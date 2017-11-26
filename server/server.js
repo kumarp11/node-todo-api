@@ -7,6 +7,7 @@ var {userModel}=require('./models/user')
 
 var app=express()
 app.use(bodyParser.json())
+
 app.post('/todos',(req,res)=>{
 var ToDoModelDoc= new ToDoModel({text:req.body.text})
 ToDoModelDoc.save().then((doc)=>{
@@ -14,6 +15,14 @@ ToDoModelDoc.save().then((doc)=>{
 },(err)=>{
     res.status(400).send(err)
 })
+})
+
+app.get('/todos',(req,res)=>{
+  ToDoModel.find().then((docs)=>{
+    res.send({docs})
+  },(err)=>{
+    res.status(400).send(err)
+  })
 })
 
 
