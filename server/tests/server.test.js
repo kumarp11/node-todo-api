@@ -4,10 +4,12 @@ const request=require('supertest')
 const {app}=require('./../server')
 const {ToDoModel}=require('./../models/todo')
 
+const todos=[{text:'This is first example'},{text:'This is second example'}]
+
 beforeEach((done)=>{
   ToDoModel.remove({}).then(()=>{
-    done()
-  })
+    ToDoModel.insertMany(todos).then(()=>{done()})
+    })
 })
 
 describe('POST /ToDo',()=>{
@@ -25,7 +27,7 @@ describe('POST /ToDo',()=>{
         {
           return done(err)
         }
-        ToDoModel.find().then((docs)=>{
+        ToDoModel.find({text}).then((docs)=>{
           expect(docs.length).toBe(1)
           expect(docs[0].text).toBe(text)
           done()
@@ -46,7 +48,7 @@ describe('POST /ToDo',()=>{
        }
 
        ToDoModel.find().then((docs)=>{
-         expect(docs.length).toBe(0)
+         expect(docs.length).toBe(2)
          done()
        }).catch((e)=>{
          return done(e)
@@ -55,4 +57,17 @@ describe('POST /ToDo',()=>{
   })
 
 
+})
+
+describe('Get /todos',()=>{
+  it('Should get todos',(done)=>{
+    request(app)
+
+      .get('/todos')
+      .expect(200)
+      .expect((res)=>{
+        expect(res.body.docs.length).toBe(2)
+        })
+        .end(done)
+  })
 })
