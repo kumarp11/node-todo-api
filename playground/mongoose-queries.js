@@ -1,9 +1,9 @@
 const {mongoose}=require('./../server/db/mongoose.js')
 const {userModel}=require('./../server/models/user.js')
 
-var id='5a18785af7df572270b49df'
+var id='5a18785af7df572270b49dfd'
 
-userModel.findById(id).then((userModel)=>{
+userModel.findById(id).then((userModel)=>{S
   if(!userModel)
   {
     return console.log('User not find')
