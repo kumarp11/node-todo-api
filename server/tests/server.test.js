@@ -4,7 +4,9 @@ const request=require('supertest')
 const {app}=require('./../server')
 const {ToDoModel}=require('./../models/todo')
 
-const todos=[{text:'This is first example'},{text:'This is second example'}]
+const {ObjectID}=require('mongodb')
+
+const todos=[{_id:new ObjectID(),text:'This is first example'},{_id:new ObjectID(),text:'This is second example'}]
 
 beforeEach((done)=>{
   ToDoModel.remove({}).then(()=>{
@@ -70,4 +72,31 @@ describe('Get /todos',()=>{
         })
         .end(done)
   })
+})
+
+describe('Get /todos/id',()=>{
+  it('Should return todos',(done)=>{
+    request(app)
+    .get(`/todos/${todos[0]._id.toHexString()}`)
+    .expect(200)
+    .expect((res)=>{
+      expect(res.body.text).toBe(todos[0].text)
+    })
+    .end(done)
+  })
+
+  it('Should return a 404 if todo is not found',(done)=>{
+    request(app)
+    .get(`/todos/${new ObjectID().toHexString()}`)
+    .expect(404)
+    .end(done)
+  })
+
+  it('Should return a 404 if not a valid object ID',(done)=>{
+    request(app)
+    .get('/todos/56hsgkhghkdghsg99')
+    .expect(404)
+    .end(done)
+  })
+
 })

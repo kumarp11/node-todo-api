@@ -39,7 +39,7 @@ ToDoModel.findById(id).then((todo)=>{
   {
     return  res.status(404).send()
   }
-  return res.send(todo)
+ return res.send(todo)
 
 },(err)=>{return  res.status(400).send()})
 
