@@ -6,6 +6,8 @@ var {ToDoModel}=require('./models/todo')
 var {userModel}=require('./models/user')
 var {ObjectID}=require('mongodb')
 
+const port=process.env.PORT||3000//before cinfiguring to heroku server
+
 var app=express()
 app.use(bodyParser.json())
 
@@ -37,7 +39,7 @@ app.get('/todos/:id',(req,res)=>{
 ToDoModel.findById(id).then((todo)=>{
   if(!todo)
   {
-    return  res.status(404).send()
+return  res.status(404).send()
   }
  return res.send(todo)
 
@@ -46,6 +48,25 @@ ToDoModel.findById(id).then((todo)=>{
 })
 
 
-app.listen(3000,()=>{console.log('started at port 3000')})
+app.delete('/todos/:id',(req,res)=>{
+  var id=req.params.id
+  var validity=  ObjectID.isValid(id)
+    if(!validity)
+    {
+    return  res.status(404).send()
+    }
+
+ToDoModel.findByIdAndRemove(id).then((todo)=>{
+  if(!todo)
+  {
+return  res.status(404).send()
+  }
+ return res.send(todo)
+
+},(err)=>{return  res.status(400).send()})
+
+})
+
+app.listen(port,()=>{console.log(`started at port ${port}`)})
 
 module.exports={app:app}
