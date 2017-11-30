@@ -128,3 +128,26 @@ describe('Delete /todos/id',()=>{
   })
 
 })
+
+describe('Update /todos/id',()=>{
+  it('Object ID is Invalid',(done)=>{
+    request(app)
+    .expect(404)
+    .end(done)
+  })
+  it('Should update the ID',(done)=>{
+    request(app)
+    .update(`/todos/${todo[0]._id.toHexString()}`)
+    .expect(200)
+    .expect((res)=>{
+      expect(res.body.text).toBe(todo[0].text)
+    })
+    .end(done)
+  })
+  it('Id not found',(done)=>(
+    request(app)
+    .update(`/todos/${todo[0]._id.toHexString()}`)
+    .expect(404)
+    .end(done)
+  ))
+})

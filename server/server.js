@@ -1,5 +1,6 @@
 var express=require('express')
 var bodyParser=require('body-parser')
+const _=require('lodash')
 
 var {mongoose}=require('./db/mongoose')
 var {ToDoModel}=require('./models/todo')
@@ -65,6 +66,31 @@ return  res.status(404).send()
 
 },(err)=>{return  res.status(400).send()})
 
+})
+
+app.patch('/todos/:id',(req,res)=>{
+  var id=req.params.id
+  var body=_.pick(req.body,['text','completed'])
+  if(!ObjectID.isValid(id))
+  {
+    return res.status(404).send()
+  }
+  if(_.isBoolean(body.completed) && body.completed)
+  {
+    body.completedat=new Date().getTime()
+  }
+  else
+  {
+    body.completed=false
+    body.completedat=null
+  }
+  ToDoModel.findByIdAndUpdate(id,{$set:body},{new:true}).then((doc)=>{
+  if(!doc)
+  {
+      return res.status(404).send()
+  }
+    return res.send({doc})
+  },(err)=>{return  res.status(400).send()})
 })
 
 app.listen(port,()=>{console.log(`started at port ${port}`)})
