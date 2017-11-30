@@ -70,11 +70,13 @@ return  res.status(404).send()
 
 app.patch('/todos/:id',(req,res)=>{
   var id=req.params.id
-  var body=_.pick(req.body,['text','completed'])
+
   if(!ObjectID.isValid(id))
   {
     return res.status(404).send()
   }
+  var body=_.pick(req.body,['text','completed'])
+
   if(_.isBoolean(body.completed) && body.completed)
   {
     body.completedat=new Date().getTime()

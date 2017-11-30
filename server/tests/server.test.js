@@ -6,7 +6,7 @@ const {ToDoModel}=require('./../models/todo')
 
 const {ObjectID}=require('mongodb')
 
-const todos=[{_id:new ObjectID(),text:'This is first example'},{_id:new ObjectID(),text:'This is second example'}]
+const todos=[{_id:new ObjectID(),text:'This is first example',completed:false,completedat:333},{_id:new ObjectID(),text:'This is second example',completed:false,completedat:333}]
 
 beforeEach((done)=>{
   ToDoModel.remove({}).then(()=>{
@@ -129,25 +129,40 @@ describe('Delete /todos/id',()=>{
 
 })
 
-describe('Update /todos/id',()=>{
+describe('PATCH /todos/id',()=>{
   it('Object ID is Invalid',(done)=>{
     request(app)
+    .patch(`/todos/${new ObjectID().toHexString()}`)
     .expect(404)
     .end(done)
   })
-  it('Should update the ID',(done)=>{
+  it('Should update the todo',(done)=>{
+    var text='This is first update from Patch';
     request(app)
-    .update(`/todos/${todo[0]._id.toHexString()}`)
+    .patch(`/todos/${todos[0]._id.toHexString()}`)
+    .send({text,completed:true})
     .expect(200)
     .expect((res)=>{
-      expect(res.body.text).toBe(todo[0].text)
+      expect(res.body.doc.text).toBe(text)
+      expect(res.body.doc.completed).toBe(true)
+      expect(res.body.doc.completedat).toBeA('number')
     })
     .end(done)
   })
-  it('Id not found',(done)=>(
+
+  it('Should clear completedat when todo is not completed',(done)=>{
+    var text="This is second update from Patch"
+    var completed=false
     request(app)
-    .update(`/todos/${todo[0]._id.toHexString()}`)
-    .expect(404)
+    .patch(`/todos/${todos[1]._id.toHexString()}`)
+    .send({text,completed})
+    .expect(200)
+    .expect((res)=>{
+      expect(res.body.doc.text).toBe(text)
+      expect(res.body.doc.completed).toBe(false)
+      expect(res.body.doc.completedat).toNotExist()
+    })
     .end(done)
-  ))
+  })
+
 })
