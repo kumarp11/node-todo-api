@@ -100,3 +100,31 @@ describe('Get /todos/id',()=>{
   })
 
 })
+
+
+describe('Delete /todos/id',()=>{
+  it('Should delete todos',(done)=>{
+    request(app)
+    .delete(`/todos/${todos[0]._id.toHexString()}`)
+    .expect(200)
+    .expect((res)=>{
+      expect(res.body.text).toBe(todos[0].text)
+    })
+    .end(done)
+  })
+
+  it('Should return a 404 if todo is not found',(done)=>{
+    request(app)
+    .delete(`/todos/${new ObjectID().toHexString()}`)
+    .expect(404)
+    .end(done)
+  })
+
+  it('Should return a 404 if not a valid object ID',(done)=>{
+    request(app)
+    .delete('/todos/56hsgkhghkdghsg99')
+    .expect(404)
+    .end(done)
+  })
+
+})
