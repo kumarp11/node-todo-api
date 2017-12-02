@@ -96,6 +96,16 @@ app.patch('/todos/:id',(req,res)=>{
   },(err)=>{return  res.status(400).send()})
 })
 
+app.post('/users',(req,res)=>{
+  var body=_.pick(req.body,['email','password'])
+  var userModelDoc=new userModel(body)
+  userModelDoc.save().then((user)=>{
+      return userModelDoc.generateAuthToken()
+  },(err)=>{res.status(400).send()}).then((token)=>{
+    res.header('x-auth',token).send(userModelDoc)
+  })
+})
+
 app.listen(port,()=>{console.log(`started at port ${port}`)})
 
 module.exports={app:app}
