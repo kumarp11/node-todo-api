@@ -2,6 +2,7 @@ const mongoose=require('mongoose')
 const validator=require('validator')
 const jwt=require('jsonwebtoken')
 const _=require('lodash')
+const bcrypt=require('bcryptjs')
 
 var userSchema=mongoose.Schema({
   email:
@@ -64,6 +65,25 @@ return userModel.findOne({
 })
 
 }
+
+userSchema.pre('save',function(next){
+  var userModelDoc=this;
+if(userModelDoc.isModified('password'))
+{
+
+  bcrypt.genSalt(10,(err,salt)=>{
+    bcrypt.hash(userModelDoc.password,salt,(err,hash)=>{
+  userModelDoc.password=hash
+  next()
+    })
+  })
+
+  }
+else {
+  next()
+}
+
+})
 
 var userModel=mongoose.model('userModel',userSchema)
 
