@@ -7,6 +7,7 @@ var {mongoose}=require('./db/mongoose')
 var {ToDoModel}=require('./models/todo')
 var {userModel}=require('./models/user')
 var {ObjectID}=require('mongodb')
+var {authenticate}=require('./middleware/authenticate')
 
 const port=process.env.PORT||3000//before cinfiguring to heroku server
 
@@ -105,6 +106,14 @@ app.post('/users',(req,res)=>{
     res.header('x-auth',token).send(userModelDoc)
   })
 })
+
+
+app.get('/users/me',authenticate,(req,res)=>
+{
+  res.send(req.userModelDoc)
+}
+)
+
 
 app.listen(port,()=>{console.log(`started at port ${port}`)})
 

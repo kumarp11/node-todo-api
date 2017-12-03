@@ -45,6 +45,26 @@ userSchema.methods.generateAuthToken=function()
 return userModelDoc.save().then(()=>{return token;})
 }
 
+
+userSchema.statics.findByToken=function(token)
+{
+  var userModel=this;
+  var decoded;
+  try {
+    decoded=jwt.verify(token,'123abc')
+  } catch (e) {
+    return new Promise((resolve,reject)=>{
+      reject()
+    })
+  }
+return userModel.findOne({
+  '_id':decoded._id,
+  'tokens.token':token,
+  'tokens.access':'auth'
+})
+
+}
+
 var userModel=mongoose.model('userModel',userSchema)
 
 module.exports={userModel:userModel}
