@@ -3,16 +3,12 @@ const request=require('supertest')
 
 const {app}=require('./../server')
 const {ToDoModel}=require('./../models/todo')
+const {userModel}=require('./../models/user')
 
 const {ObjectID}=require('mongodb')
-
-const todos=[{_id:new ObjectID(),text:'This is first example',completed:false,completedat:333},{_id:new ObjectID(),text:'This is second example',completed:false,completedat:333}]
-
-beforeEach((done)=>{
-  ToDoModel.remove({}).then(()=>{
-    ToDoModel.insertMany(todos).then(()=>{done()})
-    })
-})
+const {todos,populatetodos,userModelDoc,populateusers}=require('./seed/seed')
+beforeEach(populateusers)
+beforeEach(populatetodos)
 
 describe('POST /ToDo',()=>{
   it('Should work as expected',(done)=>{
@@ -165,4 +161,70 @@ describe('PATCH /todos/id',()=>{
     .end(done)
   })
 
+})
+
+describe('Get /users/me',()=>{
+
+  it('Should fetch the correct user',(done)=>{
+    request(app)
+    .get('/users/me')
+    .set('x-auth',userModelDoc[0].tokens[0].token)
+    .expect(200)
+    .expect((res)=>{
+      expect(res.body._id).toBe(userModelDoc[0]._id.toHexString())
+      expect(res.body.email).toBe(userModelDoc[0].email)
+    })
+    .end(done)
+  })
+
+  it('Should retuen 401 if user not found',(done)=>{
+    request(app)
+    .get('/users/me')
+    .set('x-auth','')
+    .expect(401)
+    .expect((res)=>{
+      expect(res.body).toEqual({})
+    })
+    .end(done)
+  })
+
+})
+
+
+
+describe('POST /users',()=>{
+
+  it('Should save the user ',(done)=>{
+var email='kalpna@chachi.com'
+var password='kalpna'
+    request(app)
+    .post('/users')
+    .send({email,password})
+    .expect(200)
+    .expect((res)=>{
+      expect(res.headers['x-auth']).toExist()
+      expect(res.body.email).toBe(email)
+    })
+    .end(done)
+  })
+
+  it('Should not save user if email is already in use',(done)=>{
+    var email='prashant@example.com'
+    var password='kalpna'
+    request(app)
+    .post('/users')
+    .send({email,password})
+    .expect(400)
+    .end(done)
+})
+
+  it('Should return validation errors if request is invalid',(done)=>{
+    var email='kalpnachachi.com'
+    var password='kalpna'
+    request(app)
+    .post('/users')
+    .send({email,password})
+    .expect(400)
+    .end(done)
+})
 })
